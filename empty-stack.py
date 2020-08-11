@@ -104,21 +104,23 @@ def parse_params(params_file):
             params = json.loads(read_data)
     return params
 
+
+@click.command()
+@click.option("--name", "stack_name", required=True, help="Name of stack to update.")
+@click.option("--template", required=False, help="Cloudformation template file location.")
+@click.option("--parameters", "params_file", required=False, help="Parameter file to use with the CloudFormation template.")
+# @click.option("--delete", required=False, expose_value=False, is_flag=True, help="Flag to delete the stack.")
+def cli(stack_name, template, params_file):
+    if not stack_exists(stack_name, None):
+        logger.info(f'Creating stack with name: {stack_name}')
+        create_empty_stack(stack_name)
+    params = parse_params(params_file)
+    if template:
+        logger.info(f'Reading template from file: {template}')
+        with open(template) as file:
+            read_data = file.read()
+        logger.info(f'Updating stack: {stack_name}')
+        update_stack(stack_name, read_data, params)
+
 if __name__ == '__main__':
-    @click.command()
-    @click.option("--name", "stack_name", required=True, help="Name of stack to update.")
-    @click.option("--template", required=False, help="Cloudformation template file location.")
-    @click.option("--parameters", "params_file", required=False, help="Parameter file to use with the CloudFormation template.")
-    # @click.option("--delete", required=False, expose_value=False, is_flag=True, help="Flag to delete the stack.")
-    def cli(stack_name, template, params_file):
-        if not stack_exists(stack_name, None):
-            logger.info(f'Creating stack with name: {stack_name}')
-            create_empty_stack(stack_name)
-        params = parse_params(params_file)
-        if template:
-            logger.info(f'Reading template from file: {template}')
-            with open(template) as file:
-                read_data = file.read()
-            logger.info(f'Updating stack: {stack_name}')
-            update_stack(stack_name, read_data, params)
     cli()
