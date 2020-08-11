@@ -1,0 +1,9 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Conditions:
+  HasNot: !Equals [ 'a', 'b' ]
+
+Resources:
+  NullResource:
+    Type: 'Custom::NullResource'
+    Condition: HasNot

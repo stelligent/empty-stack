@@ -1,0 +1,12 @@
+{
+  'AWSTemplateFormatVersion' : '2010-09-09',
+  'Conditions' : {
+      'HasNot': { 'Fn::Equals' : [ 'a', 'b' ] }
+  },
+  'Resources' : {
+      'NullResource' : {
+          'Type' : 'Custom::NullResource',
+          'Condition' : 'HasNot'
+      }
+  }
+}
