@@ -1,21 +1,24 @@
-import boto3
-import click
 import logging
 import sys
 
+import boto3
+import click
+
 def setup_logging(log_stream=sys.stdout, log_level=logging.INFO):
-  log = logging.getLogger(__name__)
-  out_hdlr = logging.StreamHandler(log_stream)
-  out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-  out_hdlr.setLevel(logging.INFO)
-  log.addHandler(out_hdlr)
-  log.setLevel(log_level)
-  return log
+    """Sets up logging."""
+    log = logging.getLogger(__name__)
+    out_hdlr = logging.StreamHandler(log_stream)
+    out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+    out_hdlr.setLevel(logging.INFO)
+    log.addHandler(out_hdlr)
+    log.setLevel(log_level)
+    return log
 
 logger = setup_logging()
 cfn = boto3.client('cloudformation')
 
 def stack_exists(stack_name, token):
+    """Determines if CloudFormation stack exists with given name."""
     if token:
         response = cfn.list_stacks(NextToken=token)
     else:
@@ -25,14 +28,14 @@ def stack_exists(stack_name, token):
         for stack in stacks:
             if stack['StackName'] == stack_name:
                 if stack['StackStatus'] != 'DELETE_COMPLETE':
-                    logger.info(f'Found existing stack with name: {stack_name}')
+                    logger.info('Found existing stack with name: %s', stack_name)
                     return True
     if 'NextToken' in response:
         return stack_exists(stack_name, response['NextToken'])
-    else:
-        return False
+    return False
 
 def create_empty_stack(stack_name):
+    """Create CloudFormation stack with no infrastructure."""
     json = """
     {
       'AWSTemplateFormatVersion' : '2010-09-09',
@@ -47,7 +50,7 @@ def create_empty_stack(stack_name):
       }
     }
     """
-    response = cfn.create_stack(
+    cfn.create_stack(
         StackName=stack_name,
         TemplateBody=json
     )
@@ -59,10 +62,11 @@ def create_empty_stack(stack_name):
             'MaxAttempts': 100
         }
     )
-    logger.info(f'Successfully created stack: {stack_name}')
+    logger.info('Successfully created stack: %s', stack_name)
     return 0
 
 def delete_stack(stack_name):
+    """Delete existing CloudFormation stack."""
     cfn.delete_stack(
         StackName=stack_name
     )
@@ -74,10 +78,11 @@ def delete_stack(stack_name):
             'MaxAttempts': 180
         }
     )
-    logger.info(f'Successfully deleted stack: {stack_name}')
+    logger.info('Successfully deleted stack: %s', stack_name)
     return 0
 
 def update_stack(stack_name, template, parameters):
+    """Update existing CloudFormation stack."""
     cfn.update_stack(
         StackName=stack_name,
         TemplateBody=template,
@@ -91,35 +96,36 @@ def update_stack(stack_name, template, parameters):
             'MaxAttempts': 180
         }
     )
-    logger.info(f'Successfully updated stack: {stack_name}')
+    logger.info('Successfully updated stack: %s', stack_name)
     return 0
 
 def parse_params(params_file):
+    """Parse parameters into list. If no params passed in, return empty list."""
     params = []
     if params_file:
         import json
-        logger.info(f'Parsing parameters from file: {params_file}')
+        logger.info('Parsing parameters from file: %s', params_file)
         with open(params_file) as file:
             read_data = file.read()
             params = json.loads(read_data)
     return params
 
-def cli(stack_name, template, params_file):
-    if not stack_exists(stack_name, None):
-        logger.info(f'Creating stack with name: {stack_name}')
-        create_empty_stack(stack_name)
-    params = parse_params(params_file)
-    if template:
-        logger.info(f'Reading template from file: {template}')
-        with open(template) as file:
-            read_data = file.read()
-        logger.info(f'Updating stack: {stack_name}')
-        update_stack(stack_name, read_data, params)
-
-@click.command()
-@click.option("--name", "stack_name", required=True, help="Name of stack to update.")
-@click.option("--template", required=False, help="Cloudformation template file location.")
-@click.option("--parameters", "params_file", required=False, help="Parameter file to use with the CloudFormation template.")
-# @click.option("--delete", required=False, expose_value=False, is_flag=True, help="Flag to delete the stack.")
 if __name__ == '__main__':
+    @click.command()
+    @click.option("--name", "stack_name", required=True, help="Name of stack to update.")
+    @click.option("--template", required=False, help="Cloudformation template file location.")
+    @click.option("--parameters", "params_file", required=False, help="Parameter file to use with the CloudFormation template.")
+    def cli(stack_name, template, params_file):
+        """Command Line Interface logic"""
+        if not stack_exists(stack_name, None):
+            logger.info('Creating stack with name: %s', stack_name)
+            create_empty_stack(stack_name)
+        params = parse_params(params_file)
+        if template:
+            logger.info('Reading template from file: %s', stack_name)
+            with open(template) as file:
+                read_data = file.read()
+            logger.info('Updating stack: %s', stack_name)
+            update_stack(stack_name, read_data, params)
+    # pylint: disable=no-value-for-parameter
     cli()
