@@ -1,3 +1,12 @@
+"""
+empty-stack.py creates an empty cloudformation stack, then updates the stack.
+
+Creating the stack without infrastructure allows rollbacks that don't require
+the stack to be deleted on an error.
+
+Example usage:
+  python3 empty-stack.py --name main_vpc --template vpc.yaml --parameters params.json
+"""
 import logging
 import sys
 
