@@ -14,22 +14,22 @@ pip install -r requirements.txt
 
 Example usage without parameters file:
 ```
-python3 empty-stack.py --name test-vpc --template vpc.yaml
+python3 empty_stack.py --name test-vpc --template vpc.yaml
 ```
 
 Example usage with parameters file:
 ```
-python3 empty-stack.py --name test-vpc --template vpc.yaml --parameters params.json
+python3 empty_stack.py --name test-vpc --template vpc.yaml --parameters params.json
 ```
 
 Example usage to just create the stack without infrastructure:
 ```
-python3 empty-stack.py --name test-vpc
+python3 empty_stack.py --name test-vpc
 ```
 
 Example usage with aws-vault:
 ```
-aws-vault exec your_profile -- python3 empty-stack.py --name test-vpc
+aws-vault exec your_profile -- python3 empty_stack.py --name test-vpc
 ```
 
 ## Further documentation
