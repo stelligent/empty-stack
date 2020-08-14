@@ -74,22 +74,6 @@ def create_empty_stack(stack_name):
     logger.info('Successfully created stack: %s', stack_name)
     return 0
 
-def delete_stack(stack_name):
-    """Delete existing CloudFormation stack."""
-    cfn.delete_stack(
-        StackName=stack_name
-    )
-    waiter = cfn.get_waiter('stack_delete_complete')
-    waiter.wait(
-        StackName=stack_name,
-        WaiterConfig={
-            'Delay': 10,
-            'MaxAttempts': 180
-        }
-    )
-    logger.info('Successfully deleted stack: %s', stack_name)
-    return 0
-
 def update_stack(stack_name, template, parameters):
     """Update existing CloudFormation stack."""
     cfn.update_stack(
