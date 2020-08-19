@@ -74,12 +74,16 @@ def create_empty_stack(stack_name):
     logger.info('Successfully created stack: %s', stack_name)
     return 0
 
-def update_stack(stack_name, template, parameters):
+def update_stack(stack_name, template, parameters, iam):
     """Update existing CloudFormation stack."""
+    iam_capabilities = []
+    if iam:
+        iam_capabilities = ['CAPABILITY_NAMED_IAM']
     cfn.update_stack(
         StackName=stack_name,
         TemplateBody=template,
-        Parameters=parameters
+        Parameters=parameters,
+        Capabilities=iam_capabilities
     )
     waiter = cfn.get_waiter('stack_update_complete')
     waiter.wait(
@@ -108,7 +112,8 @@ if __name__ == '__main__':
     @click.option("--name", "stack_name", required=True, help="Name of stack to update.")
     @click.option("--template", required=False, help="Cloudformation template file location.")
     @click.option("--parameters", "params_file", required=False, help="Parameter file to use with the CloudFormation template.")
-    def cli(stack_name, template, params_file):
+    @click.option("--iam", default=False, is_flag=True, required=False, help="Add this flag to use iam capabilites.")
+    def cli(stack_name, template, params_file, iam):
         """Command Line Interface logic"""
         if not stack_exists(stack_name, None):
             logger.info('Creating stack with name: %s', stack_name)
@@ -119,6 +124,6 @@ if __name__ == '__main__':
             with open(template) as file:
                 read_data = file.read()
             logger.info('Updating stack: %s', stack_name)
-            update_stack(stack_name, read_data, params)
+            update_stack(stack_name, read_data, params, iam)
     # pylint: disable=no-value-for-parameter
     cli()

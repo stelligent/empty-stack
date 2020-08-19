@@ -27,6 +27,11 @@ Example usage to just create the stack without infrastructure:
 python3 empty_stack.py --name test-vpc
 ```
 
+Example usage with iam capabilites required:
+```
+python3 empty_stack.py --name test-vpc --template vpc.yaml --iam
+```
+
 Example usage with aws-vault:
 ```
 aws-vault exec your_profile -- python3 empty_stack.py --name test-vpc
