@@ -93,7 +93,7 @@ def update_stack(stack_name, template, parameters, iam, cfn):
                 'MaxAttempts': 180
             }
         )
-    except  Exception as e :
+    except  Exception as e:
         a = str(e).split(':')
         end = len(a)
         if 'No updates' in a[end -1]:
@@ -124,7 +124,7 @@ def update_stack_url(stack_name, templateURL, parameters, iam, cfn):
                 'MaxAttempts': 180
             }
         )
-    except  Exception as e :
+    except  Exception as e:
         a = str(e).split(':')
         end = len(a)
         if 'No updates' in a[end -1]:
